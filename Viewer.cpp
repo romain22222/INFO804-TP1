@@ -39,7 +39,7 @@ float colorBronzeDiff[4] = { 0, 0, 0.0, 1.0 };
 	glColor4fv(colorBronzeDiff);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, colorBronzeDiff);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, colorBronzeSpec);
-	glMaterialf(GL_FRONT, GL_SHININESS, 20.0f );
+	glMaterialf(GL_FRONT, GL_SHININESS, 1.0f );
 	for (auto t : this->ptrSoup->triangles) {
 		Vecteur n = t.normal();
 		glNormal3f( n[ 0 ], n[ 1 ], n[ 2 ] );

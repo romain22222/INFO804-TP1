@@ -4,6 +4,7 @@
 #include <ostream>
 #include <vector>
 #include <iostream>
+#include <map>
 #include "math.h"
 
 // Utils.h
@@ -52,6 +53,9 @@ struct Vecteur {
 		return *this / this->norm();
 	}
 
+	Vecteur operator+(const Vecteur& other) const {
+		return Vecteur(this->xyz[0]+other.xyz[0], this->xyz[1]+other.xyz[1], this->xyz[2]+other.xyz[2]);
+	}
 };
 std::ostream& operator<<( std::ostream& out, Vecteur v );
 std::istream& operator>>( std::istream& in, Vecteur& v );
@@ -94,6 +98,12 @@ struct TriangleSoup {
 			triangles.push_back(t);
 		}
 		triangles.pop_back();
+	}
+
+	void write(std::ostream& out) {
+		for (auto t: triangles) {
+			out << t << "\n";
+		}
 	}
 
 	void boundingBox(Vecteur& low, Vecteur& up) const {
@@ -143,6 +153,23 @@ struct Index {
 
 std::ostream& operator<<( std::ostream& out, Index i );
 
+// Structure pour calculer le barycentre d'un ensemble de points.
+struct CellData {
+	Vecteur acc;
+	int nb;
+	// Crée un accumulateur vide.
+	CellData(): acc(), nb(0) {}
+	// Ajoute le point v à l'accumulateur.
+	void add( const Vecteur& v ) {
+		acc = acc + v;
+		nb++;
+	}
+	// Retourne le barycentre de tous les points ajoutés.
+	Vecteur barycenter() const {
+		return acc/nb;
+	}
+};
+
 struct TriangleSoupZipper {
 
 	const TriangleSoup& i;
@@ -153,6 +180,8 @@ struct TriangleSoupZipper {
 	Vecteur bmax;
 
 	Vecteur bs;
+
+	std::map<Index, CellData> index2data;
 
 	// Construit le zipper avec une soupe de triangle en entrée \a
 	// anInput, une soupe de triangle en sortie \a anOutput, et un index \a size
@@ -182,6 +211,7 @@ struct TriangleSoupZipper {
 			std::vector<Index> thisTI;
 			for (int i = 0; i < 3; i++) {
 				thisTI.push_back(index(t[i]));
+				index2data[index(t[i])].add(t[i]);
 			}
 			if (thisTI[0] == thisTI[1] || thisTI[0] == thisTI[2] || thisTI[1] == thisTI[2]) {
 				continue;
@@ -189,6 +219,17 @@ struct TriangleSoupZipper {
 			o.triangles.push_back(Triangle(centroid(thisTI[0]),centroid(thisTI[1]),centroid(thisTI[2])));
 		}
 	}
+
+	void smartZip() {
+		index2data.clear();
+		zip();
+		for (auto& t: o.triangles) {
+			for (int i = 0; i < 3; ++i) {
+				t[i] = index2data[index(t[i])].barycenter();
+			}
+		}
+	}
 };
+
 
 #endif
