@@ -1,0 +1,12 @@
+/.clang-format
+/.qglviewer.xml
+/.qmake.stash
+/bunny258.tri
+/libQGLViewer-qt5.so
+/main.o
+/Makefile
+/tref.tri
+/Utils.o
+/viewer
+/Viewer.o
+/.idea/*
